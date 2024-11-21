@@ -1,0 +1,34 @@
+
+FROM ubuntu:20.04
+
+
+ENV NEXUS_VERSION=3.41.0-01
+ENV NEXUS_DATA=/nexus-data
+
+
+RUN apt-get update && \
+    apt-get install -y openjdk-11-jdk wget && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+
+RUN groupadd -r nexus && useradd -r -g nexus -m -d /nexus -s /bin/false nexus
+
+
+RUN mkdir /nexus-data && chown -R nexus:nexus /nexus-data
+
+
+RUN wget https://download.sonatype.com/nexus/3/latest-unix.tar.gz -O nexus.tar.gz && \
+    tar -xvzf nexus.tar.gz -C /opt/ && \
+    mv /opt/nexus-* /opt/nexus && \
+    chown -R nexus:nexus /opt/nexus && \
+    rm nexus.tar.gz
+
+
+EXPOSE 8081
+
+
+USER nexus
+
+
+CMD ["bash", "/opt/nexus/bin/nexus", "run"]
